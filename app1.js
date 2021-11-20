@@ -3,6 +3,11 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
+const hpp = require("hpp");
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const mongoSanitize = require('express-mongo-sanitize');
 const cookieParser = require('cookie-parser');
 const userRouter = require('./Router/userRouter');
 const authRouter = require('./Router/authRouter');
@@ -24,9 +29,30 @@ const app = express();
 // always use me
 //  express json -> req.body add
 // reserve a folder only from which client can acces the files 
+app.use(rateLimit({
+    max: 100,
+    windowMs: 15 * 60 * 1000,
+    message:
+        "Too many accounts created from this IP, please try again after an hour"
+}))
+// extra param na ho bas
+app.use(hpp({
+    whiteList: [
+        'select',
+        'page',
+        'sort',
+        'myquery'
+    ]
+}))
+// to set http headers
+app.use(helmet());
 app.use(express.static("Frontend_folder"));
 app.use(express.json());
 app.use(cookieParser());
+// cross site scripting 
+app.use(xss());
+// mongodb query sanatize
+app.use(mongoSanitize());
 // // function -> route  path
 // // frontend -> req -> /
 // read data storage

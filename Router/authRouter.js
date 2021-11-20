@@ -8,6 +8,7 @@ const userModel = require("../model/userModel")
 const { bodyChecker } = require("./utilFns");
 const emailSender = require("../helpers/emailSender");
 // router
+const bcrypt = require("bcrypt");
 const authRouter = express.Router();
 
 // routes 
@@ -37,9 +38,9 @@ async function loginUser(req, res) {
         let user = await userModel.findOne({ email });
         if (user) {
             // password
-            if (user.password == password) {
-                let token = jwt.sign({ id: user["_id"] }, JWT_SECRET)
-
+            let areEqual = await bcrypt.compare(password,user.password);
+            if(areEqual){
+                let token = jwt.sign({id:user["_id"]},JWT_SECRET);
                 res.cookie("JWT", token);
                 res.status(200).json({
                     data: user,

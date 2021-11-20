@@ -1,7 +1,6 @@
 // dependency
 const express = require("express");
-const userModel =
-    require("../model/userModel")
+const userModel =require("../model/userModel")
 // router
 const userRouter = express.Router();
 const { protectRoute, bodyChecker, isAuthorized } = require("./utilFns");
